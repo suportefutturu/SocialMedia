@@ -546,6 +546,9 @@ def create_community():
         community = Community(name=name, description=description, creator_id=current_user.id)
         db.session.add(community)
         
+        # FORÇA O FLUSH PARA GERAR O ID DA COMUNIDADE ANTES DE CRIAR O MEMBRO
+        db.session.flush()
+        
         # Adicionar criador como membro
         membership = CommunityMember(user_id=current_user.id, community_id=community.id)
         db.session.add(membership)
