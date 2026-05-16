@@ -42,10 +42,10 @@ class User(UserMixin, db.Model):
     comments = db.relationship('Comment', backref='author', lazy='dynamic', cascade='all, delete-orphan')
     friendships_as_user1 = db.relationship('Friendship', foreign_keys='Friendship.user1_id', backref='user1', lazy='dynamic')
     friendships_as_user2 = db.relationship('Friendship', foreign_keys='Friendship.user2_id', backref='user2', lazy='dynamic')
-    visits_made = db.relationship('Visit', foreign_keys='Visit.visitor_id', backref='visitor', lazy='dynamic')
-    visits_received = db.relationship('Visit', foreign_keys='Visit.visited_user_id', backref='visited_user', lazy='dynamic')
-    guestbook_entries = db.relationship('GuestbookEntry', foreign_keys='GuestbookEntry.owner_id', backref='owner', lazy='dynamic', cascade='all, delete-orphan')
-    community_memberships = db.relationship('CommunityMember', backref='member', lazy='dynamic', cascade='all, delete-orphan')
+    visits_made = db.relationship('Visit', foreign_keys='Visit.visitor_id', back_populates='visitor', lazy='dynamic')
+    visits_received = db.relationship('Visit', foreign_keys='Visit.visited_user_id', back_populates='visited_user', lazy='dynamic')
+    guestbook_entries = db.relationship('GuestbookEntry', foreign_keys='GuestbookEntry.owner_id', back_populates='owner', lazy='dynamic', cascade='all, delete-orphan')
+    community_memberships = db.relationship('CommunityMember', back_populates='member', lazy='dynamic', cascade='all, delete-orphan')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -102,7 +102,8 @@ class Visit(db.Model):
     visited_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     visited_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    visitor = db.relationship('User', foreign_keys=[visitor_id], backref='visits_made')
+    visitor = db.relationship('User', foreign_keys=[visitor_id], back_populates='visits_made')
+    visited_user = db.relationship('User', foreign_keys=[visited_user_id], back_populates='visits_received')
 
 
 class GuestbookEntry(db.Model):
@@ -113,6 +114,7 @@ class GuestbookEntry(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
     author = db.relationship('User', foreign_keys=[user_id], backref='guestbook_authored')
+    owner = db.relationship('User', foreign_keys=[owner_id], back_populates='guestbook_entries')
 
 
 class Community(db.Model):
@@ -131,6 +133,8 @@ class CommunityMember(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     community_id = db.Column(db.Integer, db.ForeignKey('community.id'), nullable=False)
     joined_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    member = db.relationship('User', back_populates='community_memberships')
     
     __table_args__ = (db.UniqueConstraint('user_id', 'community_id', name='unique_community_member'),)
 
