@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: tuitlog
+    env: python
+    region: sao-paulo
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    healthCheckPath: /
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tuitlog-db
+          property: connectionString
+      - key: UPLOAD_FOLDER
+        value: ./static/uploads/photos
+      - key: AVATAR_FOLDER
+        value: ./static/uploads/avatars
+      - key: MAX_CONTENT_LENGTH
+        value: 16777216
+      - key: ALLOWED_EXTENSIONS
+        value: png,jpg,jpeg,gif
+
+databases:
+  - name: tuitlog-db
+    databaseName: tuitlog
+    user: tuitlog
+    plan: starter

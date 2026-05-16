@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tuitlog — Seu Diário Visual Diário. Um espaço tranquilo para respirar, contemplar imagens e ler palavras.">
+    
+    <title>{% block title %}Tuitlog{% endblock %} — Seu Diário Visual Diário</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS Principal -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body style="{% if user and user.bg_color %}background-color: {{ user.bg_color }};{% endif %} {% if user and user.font_family %}font-family: {{ user.font_family }};{% endif %}">
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    <!-- Header -->
+    <header class="site-header">
+        <div class="container header-content">
+            <a href="{{ url_for('index') }}" class="logo">
+                Tuitlog
+                <div class="logo-tagline">Seu diário visual diário</div>
+            </a>
+            
+            <nav class="nav-menu">
+                <a href="{{ url_for('explore') }}" class="nav-link">Explorar</a>
+                <a href="{{ url_for('communities') }}" class="nav-link">Comunidades</a>
+                
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('create_post') }}" class="btn btn-primary">
+                        <span>+</span> Novo Tuit
+                    </a>
+                    <a href="{{ url_for('profile', username=current_user.username) }}" class="nav-link">
+                        <img src="{{ url_for('static', filename='uploads/avatars/' + (current_user.avatar or 'default.png')) }}" 
+                             alt="{{ current_user.display_name }}" 
+                             class="author-avatar"
+                             style="width: 28px; height: 28px;">
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="nav-link">Sair</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="nav-link">Entrar</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary">Criar conta</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Conteúdo Principal -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container footer-content">
+            <div class="footer-logo">Tuitlog</div>
+            <div class="footer-tagline">Seu diário visual diário</div>
+            
+            <div class="footer-links">
+                <a href="{{ url_for('index') }}" class="footer-link">Início</a>
+                <a href="{{ url_for('explore') }}" class="footer-link">Explorar</a>
+                <a href="{{ url_for('communities') }}" class="footer-link">Comunidades</a>
+                <a href="#" class="footer-link">Sobre</a>
+            </div>
+            
+            <div class="footer-copyright">
+                &copy; {{ now().year if now else '2024' }} Tuitlog. Feito com calma e cuidado.
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript Principal -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

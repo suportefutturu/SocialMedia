@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Tuitbook de {{ user.display_name }}{% endblock %}
+
+{% block content %}
+<div class="tuitbook-container">
+    <header class="tuitbook-header">
+        <h1 class="tuitbook-title">📖 Tuitbook de {{ user.display_name }}</h1>
+        <p class="tuitbook-subtitle">Deixe uma mensagem neste espaço de recordações</p>
+    </header>
+    
+    <!-- Formulário -->
+    {% if current_user.is_authenticated %}
+        <div class="comment-form" style="margin-bottom: 2rem;">
+            <form action="{{ url_for('tuitbook', username=user.username) }}" method="POST">
+                <div class="form-group">
+                    <label for="message" class="form-label">Sua mensagem</label>
+                    <textarea id="message" 
+                              name="text" 
+                              class="form-textarea" 
+                              placeholder="Escreva algo para {{ user.display_name }}..."
+                              rows="4"
+                              required></textarea>
+                </div>
+                <div style="text-align: right;">
+                    <button type="submit" class="btn btn-primary">
+                        Deixar mensagem
+                    </button>
+                </div>
+            </form>
+        </div>
+    {% else %}
+        <div style="padding: 1.5rem; background: var(--color-bg-tertiary); border-radius: 0.75rem; text-align: center; margin-bottom: 2rem;">
+            <p style="color: var(--color-text-secondary); margin-bottom: 1rem;">
+                Faça login para deixar uma mensagem no Tuitbook
+            </p>
+            <a href="{{ url_for('login') }}" class="btn btn-primary">Fazer login</a>
+        </div>
+    {% endif %}
+    
+    <!-- Mensagens -->
+    {% if entries %}
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {% for entry in entries %}
+                <article class="guestbook-entry">
+                    <div class="guestbook-entry-header">
+                        <a href="{{ url_for('profile', username=entry.author.username) }}">
+                            <img src="{{ url_for('static', filename='uploads/avatars/' + (entry.author.avatar or 'default.png')) }}" 
+                                 alt="{{ entry.author.display_name }}" 
+                                 class="guestbook-avatar">
+                        </a>
+                        <div>
+                            <a href="{{ url_for('profile', username=entry.author.username) }}" 
+                               class="guestbook-author">
+                                {{ entry.author.display_name }}
+                            </a>
+                            <div class="guestbook-date">
+                                {{ entry.created_at.strftime('%d/%m/%Y às %H:%M') }}
+                            </div>
+                        </div>
+                    </div>
+                    <p class="guestbook-text">{{ entry.text }}</p>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center" style="padding: 3rem 0; color: var(--color-text-muted);">
+            <p>Ainda não há mensagens no Tuitbook.</p>
+            <p style="font-size: 0.875rem; margin-top: 0.5rem;">Seja o primeiro a deixar uma recordação!</p>
+        </div>
+    {% endif %}
+    
+    <!-- Voltar ao perfil -->
+    <div class="text-center" style="margin-top: 3rem;">
+        <a href="{{ url_for('profile', username=user.username) }}" class="btn btn-outline">
+            ← Voltar ao perfil
+        </a>
+    </div>
+</div>
+{% endblock %}

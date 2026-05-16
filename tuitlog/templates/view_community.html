@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}{{ community.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header da Comunidade -->
+    <div style="margin: 2rem 0; padding: 2rem; background: var(--color-bg-secondary); border-radius: 1rem; box-shadow: var(--shadow-sm);">
+        <h1 style="font-size: 2rem; margin-bottom: 0.5rem; color: var(--color-accent);">{{ community.name }}</h1>
+        {% if community.description %}
+            <p style="color: var(--color-text-secondary); font-size: 1rem; line-height: 1.7;">{{ community.description }}</p>
+        {% endif %}
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <div style="font-size: 0.875rem; color: var(--color-text-muted);">
+                {{ members|length }} membros • Criada por 
+                <a href="{{ url_for('profile', username=community.creator.username) }}" style="color: var(--color-accent);">
+                    {{ community.creator.display_name }}
+                </a>
+                em {{ community.created_at.strftime('%d/%m/%Y') }}
+            </div>
+            
+            {% if current_user.is_authenticated %}
+                {% if is_member %}
+                    <form action="{{ url_for('leave_community', community_id=community.id) }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-outline">
+                            Sair da Comunidade
+                        </button>
+                    </form>
+                {% else %}
+                    <form action="{{ url_for('join_community', community_id=community.id) }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-primary">
+                            Entrar na Comunidade
+                        </button>
+                    </form>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Membros -->
+    <section style="margin: 3rem 0;">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Membros ({{ members|length }})</h2>
+        
+        {% if members %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 0.75rem;">
+                {% for member in members %}
+                    <a href="{{ url_for('profile', username=member.username) }}" 
+                       title="{{ member.display_name }}"
+                       style="text-align: center;">
+                        <img src="{{ url_for('static', filename='uploads/avatars/' + (member.avatar or 'default.png')) }}" 
+                             alt="{{ member.display_name }}" 
+                             style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin: 0 auto 0.25rem;">
+                        <span style="font-size: 0.625rem; color: var(--color-text-secondary); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            {{ member.username[:10] }}{% if member.username|length > 10 %}...{% endif %}
+                        </span>
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </section>
+    
+    <!-- Feed de Postagens -->
+    <section style="margin: 3rem 0;">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Postagens da Comunidade</h2>
+        
+        {% if posts %}
+            <div class="posts-grid">
+                {% for post in posts %}
+                    <a href="{{ url_for('view_post', post_id=post.id) }}" class="post-card">
+                        <img src="{{ url_for('static', filename='uploads/photos/' + post.image) }}" 
+                             alt="{{ post.caption or 'Tuit' }}" 
+                             class="post-card-image"
+                             loading="lazy">
+                        <div class="post-card-content">
+                            <div class="post-card-author">
+                                <img src="{{ url_for('static', filename='uploads/avatars/' + (post.author.avatar or 'default.png')) }}" 
+                                     alt="{{ post.author.display_name }}" 
+                                     class="author-avatar">
+                                <span class="author-name">{{ post.author.display_name }}</span>
+                            </div>
+                            <div class="post-card-date">
+                                {{ post.created_at.strftime('%d/%m/%Y') }}
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center" style="padding: 3rem 0; color: var(--color-text-muted);">
+                <p>Ainda não há postagens nesta comunidade.</p>
+            </div>
+        {% endif %}
+    </section>
+    
+    <!-- Voltar -->
+    <div class="text-center" style="margin-top: 3rem;">
+        <a href="{{ url_for('communities') }}" class="btn btn-outline">
+            ← Ver todas as comunidades
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: tuitlog-web
+    ports:
+      - "1313:8000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
+      - DATABASE_URL=sqlite:///instance/tuitlog.db
+      - UPLOAD_FOLDER=/app/static/uploads/photos
+      - AVATAR_FOLDER=/app/static/uploads/avatars
+      - MAX_CONTENT_LENGTH=16777216
+      - ALLOWED_EXTENSIONS=png,jpg,jpeg,gif
+    volumes:
+      # Persistir uploads de fotos e avatares
+      - uploads_data:/app/static/uploads
+      # Persistir banco de dados SQLite
+      - db_data:/app/instance
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  uploads_data:
+    name: tuitlog_uploads
+  db_data:
+    name: tuitlog_database

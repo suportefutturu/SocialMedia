@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Comunidades{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin: 2rem 0;">
+        <h1 style="font-size: 1.875rem;">Tuitcomunidades</h1>
+        
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('create_community') }}" class="btn btn-primary">
+                + Criar Comunidade
+            </a>
+        {% endif %}
+    </div>
+    
+    {% if communities %}
+        <div class="communities-grid">
+            {% for community in communities %}
+                <a href="{{ url_for('view_community', community_id=community.id) }}" class="community-card">
+                    <h3 class="community-name">{{ community.name }}</h3>
+                    <p class="community-description">
+                        {{ community.description[:150] }}{% if community.description|length > 150 %}...{% endif %}
+                    </p>
+                    <div class="community-meta">
+                        {{ community.members.count() }} membros • 
+                        Criada em {{ community.created_at.strftime('%d/%m/%Y') }} por {{ community.creator.display_name }}
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center" style="padding: 4rem 0; color: var(--color-text-muted);">
+            <p>Ainda não há comunidades criadas.</p>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('create_community') }}" class="btn btn-primary" style="margin-top: 1rem;">
+                    Seja o primeiro a criar uma!
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

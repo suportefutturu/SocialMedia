@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Explorar{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 style="margin: 2rem 0; font-size: 1.875rem;">Explorar Tuits</h1>
+    
+    {% if posts.items %}
+        <div class="posts-grid">
+            {% for post in posts.items %}
+                <a href="{{ url_for('view_post', post_id=post.id) }}" class="post-card">
+                    <img src="{{ url_for('static', filename='uploads/photos/' + post.image) }}" 
+                         alt="{{ post.caption or 'Tuit' }}" 
+                         class="post-card-image"
+                         loading="lazy">
+                    <div class="post-card-content">
+                        <div class="post-card-author">
+                            <img src="{{ url_for('static', filename='uploads/avatars/' + (post.author.avatar or 'default.png')) }}" 
+                                 alt="{{ post.author.display_name }}" 
+                                 class="author-avatar">
+                            <span class="author-name">{{ post.author.display_name }}</span>
+                        </div>
+                        <div class="post-card-date">
+                            {{ post.created_at.strftime('%d/%m/%Y') }}
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+        
+        <!-- Paginação -->
+        {% if posts.pages > 1 %}
+            <nav style="display: flex; justify-content: center; gap: 0.5rem; margin: 3rem 0;">
+                {% if posts.has_prev %}
+                    <a href="{{ url_for('explore', page=posts.prev_num) }}" class="btn btn-outline">
+                        ← Anterior
+                    </a>
+                {% endif %}
+                
+                <span style="padding: 0.5rem 1rem; color: var(--color-text-muted); font-size: 0.875rem;">
+                    Página {{ posts.page }} de {{ posts.pages }}
+                </span>
+                
+                {% if posts.has_next %}
+                    <a href="{{ url_for('explore', page=posts.next_num) }}" class="btn btn-outline">
+                        Próxima →
+                    </a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="text-center" style="padding: 4rem 0; color: var(--color-text-muted);">
+            <p>Nenhum Tuit encontrado.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
