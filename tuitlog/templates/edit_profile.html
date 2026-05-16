@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Perfil{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card" style="max-width: 500px;">
+        <h1 class="auth-title">Editar Perfil</h1>
+        <p class="auth-subtitle">Personalize seu Tuitlog</p>
+        
+        <form class="auth-form" method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data">
+            <!-- Avatar -->
+            <div class="form-group">
+                <label for="avatar" class="form-label">Avatar</label>
+                <input type="file" 
+                       id="avatar" 
+                       name="avatar" 
+                       accept="image/*"
+                       style="margin-top: 0.5rem;">
+                {% if current_user.avatar and current_user.avatar != 'default.png' %}
+                    <img src="{{ url_for('static', filename='uploads/avatars/' + current_user.avatar) }}" 
+                         alt="Seu avatar atual" 
+                         style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; margin-top: 0.5rem;">
+                {% endif %}
+            </div>
+            
+            <!-- Nome de Exibição -->
+            <div class="form-group">
+                <label for="display_name" class="form-label">Nome de exibição</label>
+                <input type="text" 
+                       id="display_name" 
+                       name="display_name" 
+                       class="form-input" 
+                       required 
+                       value="{{ current_user.display_name }}"
+                       maxlength="100">
+            </div>
+            
+            <!-- Biografia -->
+            <div class="form-group">
+                <label for="bio" class="form-label">Biografia</label>
+                <textarea id="bio" 
+                          name="bio" 
+                          class="form-textarea" 
+                          rows="3"
+                          maxlength="300">{{ current_user.bio }}</textarea>
+            </div>
+            
+            <!-- Personalização Visual -->
+            <div style="border-top: 1px solid var(--color-border); margin: 1.5rem 0; padding-top: 1.5rem;">
+                <h3 style="font-size: 1.125rem; margin-bottom: 1rem;">Personalização Visual</h3>
+                
+                <div class="form-group">
+                    <label for="bg_color" class="form-label">Cor de fundo do perfil</label>
+                    <div style="display: flex; gap: 0.75rem; align-items: center;">
+                        <input type="color" 
+                               id="bg_color" 
+                               name="bg_color" 
+                               value="{{ current_user.bg_color or '#fafafa' }}"
+                               style="width: 50px; height: 40px; border: 1px solid var(--color-border); border-radius: 0.375rem; cursor: pointer;">
+                        <span style="font-size: 0.875rem; color: var(--color-text-muted);">Escolha a cor de fundo do seu perfil</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="accent_color" class="form-label">Cor de destaque</label>
+                    <div style="display: flex; gap: 0.75rem; align-items: center;">
+                        <input type="color" 
+                               id="accent_color" 
+                               name="accent_color" 
+                               value="{{ current_user.accent_color or '#2d5a5a' }}"
+                               style="width: 50px; height: 40px; border: 1px solid var(--color-border); border-radius: 0.375rem; cursor: pointer;">
+                        <span style="font-size: 0.875rem; color: var(--color-text-muted);">Cor dos links e botões</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="font_family" class="form-label">Tipo de fonte</label>
+                    <select id="font_family" 
+                            name="font_family" 
+                            class="form-input"
+                            style="cursor: pointer;">
+                        <option value="'Inter', sans-serif" {% if current_user.font_family == "'Inter', sans-serif" %}selected{% endif %}>Inter (Moderna)</option>
+                        <option value="Georgia, serif" {% if current_user.font_family == "Georgia, serif" %}selected{% endif %}>Georgia (Clássica)</option>
+                        <option value="'Times New Roman', serif" {% if current_user.font_family == "'Times New Roman', serif" %}selected{% endif %}>Times New Roman (Tradicional)</option>
+                        <option value="Arial, sans-serif" {% if current_user.font_family == "Arial, sans-serif" %}selected{% endif %}>Arial (Simples)</option>
+                        <option value="'Courier New', monospace" {% if current_user.font_family == "'Courier New', monospace" %}selected{% endif %}>Courier New (Monospace)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary auth-submit">
+                Salvar Alterações
+            </button>
+        </form>
+        
+        <p class="auth-link" style="margin-top: 1.5rem;">
+            <a href="{{ url_for('profile', username=current_user.username) }}">← Voltar ao perfil</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

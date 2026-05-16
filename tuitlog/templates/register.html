@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Criar Conta{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="auth-title">Comece seu Tuitlog</h1>
+        <p class="auth-subtitle">Crie sua conta e comece a registrar seus momentos</p>
+        
+        <form class="auth-form" method="POST" action="{{ url_for('register') }}">
+            <div class="form-group">
+                <label for="display_name" class="form-label">Nome de exibição</label>
+                <input type="text" 
+                       id="display_name" 
+                       name="display_name" 
+                       class="form-input" 
+                       required 
+                       placeholder="Seu nome completo">
+            </div>
+            
+            <div class="form-group">
+                <label for="username" class="form-label">Nome de usuário</label>
+                <input type="text" 
+                       id="username" 
+                       name="username" 
+                       class="form-input" 
+                       required 
+                       autocomplete="username"
+                       placeholder="seu_usuario"
+                       pattern="[a-zA-Z0-9_]+"
+                       title="Apenas letras, números e underline">
+            </div>
+            
+            <div class="form-group">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       class="form-input" 
+                       required 
+                       autocomplete="email"
+                       placeholder="voce@email.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">Senha</label>
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       class="form-input" 
+                       required 
+                       autocomplete="new-password"
+                       placeholder="••••••••"
+                       minlength="6">
+            </div>
+            
+            <button type="submit" class="btn btn-primary auth-submit">
+                Criar conta
+            </button>
+        </form>
+        
+        <div class="auth-divider">ou</div>
+        
+        <p class="auth-link">
+            Já tem conta? 
+            <a href="{{ url_for('login') }}">Fazer login</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

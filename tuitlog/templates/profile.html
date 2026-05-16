@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.display_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="profile-container">
+        <!-- Conteúdo Principal -->
+        <div class="profile-main">
+            <!-- Foto do Dia -->
+            {% if today_post %}
+                <section class="today-post">
+                    <article class="today-post-card">
+                        <img src="{{ url_for('static', filename='uploads/photos/' + today_post.image) }}" 
+                             alt="{{ today_post.caption or 'Foto do dia' }}" 
+                             class="today-post-image">
+                        <div class="today-post-content">
+                            <div class="today-post-date">
+                                {{ today_post.created_at.strftime('%A, %d de %B de %Y') }}
+                            </div>
+                            {% if today_post.caption %}
+                                <p class="today-post-caption">{{ today_post.caption }}</p>
+                            {% endif %}
+                            <div class="today-post-meta">
+                                <span>{{ today_post.views }} visualizações</span>
+                                <span>{{ today_post.comments.count() }} comentários</span>
+                                <a href="{{ url_for('view_post', post_id=today_post.id) }}" style="color: var(--color-accent);">Ver detalhes →</a>
+                            </div>
+                        </div>
+                    </article>
+                </section>
+            {% endif %}
+            
+            <!-- Arquivo Cronológico -->
+            <section class="archive-section">
+                <h2 class="archive-title">Arquivo</h2>
+                
+                {% if archive_posts %}
+                    <div class="archive-grid">
+                        {% for post in archive_posts %}
+                            <a href="{{ url_for('view_post', post_id=post.id) }}" class="archive-item">
+                                <img src="{{ url_for('static', filename='uploads/photos/' + post.image) }}" 
+                                     alt="{{ post.caption or 'Tuit' }}" 
+                                     class="archive-item-image"
+                                     loading="lazy">
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {% if not today_post %}
+                        <div class="text-center" style="padding: 3rem 0; color: var(--color-text-muted);">
+                            <p>Ainda não há postagens neste Tuitlog.</p>
+                            {% if is_owner %}
+                                <a href="{{ url_for('create_post') }}" class="btn btn-primary" style="margin-top: 1rem;">
+                                    Postar seu primeiro Tuit
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </section>
+        </div>
+        
+        <!-- Sidebar -->
+        <aside class="profile-sidebar">
+            <!-- Perfil -->
+            <div class="profile-header">
+                <img src="{{ url_for('static', filename='uploads/avatars/' + (user.avatar or 'default.png')) }}" 
+                     alt="{{ user.display_name }}" 
+                     class="profile-avatar-large">
+                <h1 class="profile-display-name">{{ user.display_name }}</h1>
+                <div class="profile-username">@{{ user.username }}</div>
+                {% if user.bio %}
+                    <p class="profile-bio">{{ user.bio }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Stats -->
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <div class="stat-value">{{ user.posts.count() }}</div>
+                    <div class="stat-label">Tuits</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ friends|length }}</div>
+                    <div class="stat-label">Tuitamigos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ visit_count }}</div>
+                    <div class="stat-label">Visitas (7d)</div>
+                </div>
+            </div>
+            
+            <!-- Ações -->
+            {% if current_user.is_authenticated and not is_owner %}
+                <div style="margin-top: 1.5rem;">
+                    {% if is_friend %}
+                        <form action="{{ url_for('remove_friend', username=user.username) }}" method="POST">
+                            <button type="submit" class="btn btn-outline" style="width: 100%;">
+                                Remover dos Tuitamigos
+                            </button>
+                        </form>
+                    {% else %}
+                        <form action="{{ url_for('add_friend', username=user.username) }}" method="POST">
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                Adicionar aos Tuitamigos
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% endif %}
+            
+            {% if is_owner %}
+                <div style="margin-top: 1.5rem;">
+                    <a href="{{ url_for('edit_profile') }}" class="btn btn-outline" style="width: 100%;">
+                        Editar Perfil
+                    </a>
+                </div>
+            {% endif %}
+            
+            <!-- Tuitamigos -->
+            {% if friends %}
+                <section class="friends-section">
+                    <h3 class="section-title">Tuitamigos</h3>
+                    <div class="friends-grid">
+                        {% for friend in friends[:12] %}
+                            <a href="{{ url_for('profile', username=friend.username) }}" title="{{ friend.display_name }}">
+                                <img src="{{ url_for('static', filename='uploads/avatars/' + (friend.avatar or 'default.png')) }}" 
+                                     alt="{{ friend.display_name }}" 
+                                     class="friend-avatar">
+                            </a>
+                        {% endfor %}
+                    </div>
+                    {% if friends|length > 12 %}
+                        <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-top: 0.5rem; text-align: center;">
+                            +{{ friends|length - 12 }} outros
+                        </div>
+                    {% endif %}
+                </section>
+            {% endif %}
+            
+            <!-- Tuitcomunidades -->
+            {% if user_communities %}
+                <section class="friends-section" style="margin-top: 1.5rem;">
+                    <h3 class="section-title">Tuitcomunidades</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        {% for community in user_communities[:5] %}
+                            <a href="{{ url_for('view_community', community_id=community.id) }}" 
+                               style="font-size: 0.875rem; color: var(--color-text-secondary); padding: 0.25rem 0; border-bottom: 1px solid var(--color-border);">
+                                {{ community.name }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+            
+            <!-- Tuitbook -->
+            <section class="friends-section" style="margin-top: 1.5rem;">
+                <a href="{{ url_for('tuitbook', username=user.username) }}" 
+                   style="display: block; font-size: 0.875rem; color: var(--color-accent); padding: 0.5rem; background: var(--color-bg-tertiary); border-radius: 0.375rem; text-align: center;">
+                    📖 Ver Tuitbook
+                </a>
+            </section>
+        </aside>
+    </div>
+</div>
+{% endblock %}
